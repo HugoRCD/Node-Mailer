@@ -5,9 +5,11 @@ jobs:
   run-shell-command:
     runs-on: ubuntu-latest
     steps:
-      - name: echo a string
-        run: echo "Hello World"
-      - name: multiline script
-        run: |
-          node -v
-          npm -v
+      - name: Try JS Action
+        uses: actions/hello-world-javascript-action@master
+        with:
+          who-to-great: Hugo
+      - name: Log greeting time
+        run: echo "${{ steps.greet.outputs.time }}"
+      - name: Ls on repository
+        run: ls -l
