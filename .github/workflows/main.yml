@@ -8,7 +8,7 @@ jobs:
       - name: Try JS Action
         uses: actions/hello-world-javascript-action@master
         with:
-          who-to-great: Hugo
+          who-to-greet: Hugo
       - name: Log greeting time
         run: echo "${{ steps.greet.outputs.time }}"
       - name: Ls on repository
