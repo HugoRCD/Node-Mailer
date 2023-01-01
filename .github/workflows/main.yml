@@ -11,5 +11,3 @@ jobs:
           who-to-greet: Hugo
       - name: Log greeting time
         run: echo "${{ steps.greet.outputs.time }}"
-      - name: Ls on repository
-        run: ls -l

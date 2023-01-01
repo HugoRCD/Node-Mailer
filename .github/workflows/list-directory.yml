@@ -1,0 +1,11 @@
+on: [push]
+name: List the repository
+
+jobs:
+  run-shell-command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ls on repository
+        run: |
+          pwd
+          ls
