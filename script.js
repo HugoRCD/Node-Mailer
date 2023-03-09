@@ -2,8 +2,6 @@ require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 require('dotenv').config();
 
 const commander = require("commander");
-const mysql = require('mysql2/promise');
-const dayjs = require('dayjs');
 const nodemailer = require('nodemailer'),
     fs = require('fs'),
     hogan = require('hogan.js'),
@@ -12,7 +10,7 @@ const nodemailer = require('nodemailer'),
 commander
     .version("1.0.0")
     .usage('[options]')
-    .option('-e, --env <mode>', 'Select script environment: local, preprod or production')
+    .option('-t, --template <template>', 'Template to use')
     .parse(process.argv);
 
 const program = commander.opts();
@@ -26,22 +24,42 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-async function send_email() {
+
+async function send_email(params) {
+    const new_user_template = fs.readFileSync(__dirname + "/templates/new-user.html");
+    const reset_password_template = fs.readFileSync(__dirname + "/templates/reset-password.html");
+    const reset_password_success_template = fs.readFileSync(__dirname + "/templates/reset-password-success.html");
+    const ticket_received_template = fs.readFileSync(__dirname + "/templates/ticket-received.html");
+    const verif_code_template = fs.readFileSync(__dirname + "/templates/verif-code.html");
+
+    const templates = {
+        "new-user": new_user_template,
+        "reset-password": reset_password_template,
+        "reset-password-success": reset_password_success_template,
+        "ticket-received": ticket_received_template,
+        "verif-code": verif_code_template,
+    }
+    if (!params.template || !templates[params.template]) {
+        console.error("Invalid template");
+        return;
+    }
     try {
-        const templateFile = fs.readFileSync(__dirname + "/template/template.html");
+        const templateFile = templates[params.template];
         const templateStyled = await inlineCss(templateFile.toString(), {url: "file://" + __dirname + "/template/"});
         const templateCompiled = hogan.compile(templateStyled);
         const templateRendered = templateCompiled.render(
             {
-                name: "Hugo Richard"
+                name: params.name,
+                callbackUrl: params.callbackUrl,
+                token: params.token,
             });
         const emailData = {
             to: [
-                "hrichard206@gmail.Com"
+                "hrichard206@gmail.com"
             ],
-            from: 'Maison Hochard',
+            from: 'Hugo Richard',
             subject: "Test",
-            html: templateRendered
+            html: templateRendered,
         };
         await transporter.sendMail(emailData);
     } catch (e) {
@@ -49,24 +67,14 @@ async function send_email() {
     }
 }
 
-// request exemple
-/*async function getSitesList(connection) {
-    const [rows] = await connection.execute('SELECT id, Login FROM w2r_central.S_Account_Site WHERE enabled = 1');
-    return rows;
-}*/
-
 async function launchScript() {
-    // in case of db connection
-    /*const connection = await mysql.createConnection({
-        host: (program.env && program.env === "production")
-            ? '10.5.0.4'
-            : ((program.env && program.env === "preprod")
-                ? '10.5.0.104'
-                : 'localhost'),
-        user: 'master',
-        password: 'harmony33893389'
-    });*/
-    await send_email()
+    const params = {
+        template: program.template,
+        name: "Hugo Richard",
+        token: "123456789",
+        callbackUrl: "https://www.google.com"
+    }
+    await send_email(params);
 }
 
 launchScript()
